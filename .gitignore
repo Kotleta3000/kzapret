@@ -1,0 +1,28 @@
+# --- Python ---
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# --- Runtime clones of Flowseal's repos ---
+# Cloned on first run, each has its own git history. Not part of kzapret.
+/zapret/
+/tg-ws-proxy/
+
+# --- Local user state ---
+# Contains the generated proxy secret + per-machine choices. Never commit.
+/kzapret.json
+
+# --- Logs ---
+/logs/
+
+# --- Inspection / scratch ---
+/.inspect/
+
+# --- OS / editors ---
+.vscode/
+.idea/
+*.swp
+*~
+Thumbs.db
+desktop.ini
