@@ -1,93 +1,90 @@
 # kzapret
 
-CLI-менеджер для двух утилит [Flowseal](https://github.com/Flowseal):
-[**zapret**](https://github.com/Flowseal/zapret-discord-youtube) (обход DPI) и
-[**tg-ws-proxy**](https://github.com/Flowseal/tg-ws-proxy) (прокси для Telegram, запускается без UI).
+A CLI manager for two [Flowseal](https://github.com/Flowseal) tools:
+[**zapret**](https://github.com/Flowseal/zapret-discord-youtube) (DPI bypass) and
+[**tg-ws-proxy**](https://github.com/Flowseal/tg-ws-proxy) (Telegram proxy).
 
-Одно окно: слева — логи zapret, справа — логи tg-ws-proxy, снизу — командная строка
-с подсказками. Запустил один раз — обе утилиты поднимаются в авто-режиме.
+One window: zapret logs on the left, tg-ws-proxy logs on the right, a command line
+below. Launch once — both tools come up automatically.
 
-## Запуск
+## Run
 
-1. Положите папку `kzapret` куда угодно (без кириллицы в пути).
-2. Нужен установленный [Python 3.8+](https://python.org) и `git`.
-3. Запуск **`kzapret.bat`**.
+1. Put the `kzapret` folder anywhere (path without non-ASCII characters).
+2. Requires [Python 3.8+](https://python.org) and `git`.
+3. Run **`kzapret.bat`** (it requests administrator rights — needed by winws/WinDivert).
 
-**Первый запуск** автоматически:
-- клонирует репозитории в папки `zapret/` и `tg-ws-proxy/`;
-- прогоняет тесты zapret (standard / all configs) и предлагает лучший конфиг в «авто»
-  (можно отказаться и выбрать свой);
-- спрашивает про game filter и ipset;
-- запускает tg-ws-proxy и показывает ссылку `tg://proxy?...`
-  для добавления в Telegram;
-- спрашивает, добавить ли kzapret в автозагрузку Windows;
-- показывает доступные команды.
+**First run** automatically:
+- clones the repos into `zapret/` and `tg-ws-proxy/`;
+- runs the zapret tests (standard / all configs) and offers the best config as "auto"
+  (you can decline and pick your own);
+- asks about game filter and ipset;
+- starts tg-ws-proxy and shows the `tg://proxy?...` link to add in Telegram;
+- asks whether to add kzapret to Windows autostart;
+- shows the available commands.
 
-При каждом следующем запуске kzapret проверяет обновления обеих утилит на GitHub
-и предлагает обновиться.
+On every later launch kzapret checks both tools for updates on GitHub.
 
-## Язык интерфейса
+## Language
 
-Интерфейс по умолчанию на **английском**. Переключение в любой момент:
-`/kzapret lang ru` (или `en`). При первом запуске язык спрашивается сразу.
+The interface is **English** by default. Switch anytime with `/kzapret lang ru` (or `en`).
+The language is also asked on first run.
 
-## Командная строка
+## Command line
 
-Управление начинается с имени утилиты. Автодополнение по **Tab**
-(повторный Tab — циклом по совпадениям), плюс «призрачная» подсказка
-(принять стрелкой →) и строка подсказок под вводом. `/help` — полный список.
+Commands start with the tool name. **Tab** completes (press Tab again to cycle
+matches); there is also a ghost suggestion (accept with →) and a hint line.
+`/help` lists everything.
 
 ### zapret
-| Команда | Описание |
+| Command | Description |
 |---|---|
-| `/zapret start [конфиг]` | запустить (по умолчанию — авто-конфиг) |
-| `/zapret stop` | остановить winws |
-| `/zapret restart` | перезапустить |
-| `/zapret status` | состояние и текущий конфиг |
-| `/zapret list` | список конфигов |
-| `/zapret config "<имя>"` | выбрать авто-конфиг |
-| `/zapret gamefilter <off\|tcp\|udp\|all>` | game filter для игр |
-| `/zapret ipset <on\|off>` | ipset-фильтр |
-| `/zapret test` | прогнать тесты, узнать лучший конфиг |
-| `/zapret update` | обновить (git pull) |
+| `/zapret start [config]` | start (default: auto config) |
+| `/zapret stop` | stop winws |
+| `/zapret restart` | restart |
+| `/zapret status` | state and current config |
+| `/zapret list` | list configs |
+| `/zapret config "<name>"` | set auto config |
+| `/zapret gamefilter <off\|tcp\|udp\|all>` | game filter |
+| `/zapret ipset <on\|off>` | ipset filter |
+| `/zapret test` | run tests, find the best config |
+| `/zapret update` | update (git pull) |
 
 ### tg-ws-proxy
-| Команда | Описание |
+| Command | Description |
 |---|---|
-| `/tg-ws-proxy start` | запустить прокси (headless) |
-| `/tg-ws-proxy stop` | остановить |
-| `/tg-ws-proxy restart` | перезапустить |
-| `/tg-ws-proxy status` | состояние и ссылка |
-| `/tg-ws-proxy link` | показать и скопировать ссылку |
-| `/tg-ws-proxy open` | открыть ссылку (добавить в Telegram) |
-| `/tg-ws-proxy port <число>` | сменить порт (по умолчанию 1443) |
-| `/tg-ws-proxy secret <hex\|new>` | задать/перегенерировать секрет |
-| `/tg-ws-proxy update` | обновить (git pull) |
+| `/tg-ws-proxy start` | start the proxy (headless) |
+| `/tg-ws-proxy stop` | stop |
+| `/tg-ws-proxy restart` | restart |
+| `/tg-ws-proxy status` | state and link |
+| `/tg-ws-proxy link` | show and copy the link |
+| `/tg-ws-proxy open` | open the link (add to Telegram) |
+| `/tg-ws-proxy port <number>` | change port (default 1443) |
+| `/tg-ws-proxy secret <hex\|new>` | set/regenerate the secret |
+| `/tg-ws-proxy update` | update (git pull) |
 
-Псевдонимы: `/tg`, `/tgwsproxy` → `/tg-ws-proxy`; `/z` → `/zapret`.
+Aliases: `/tg`, `/tgwsproxy` → `/tg-ws-proxy`; `/z` → `/zapret`.
 
-### kzapret / общие
-| Команда | Описание |
+### kzapret / general
+| Command | Description |
 |---|---|
-| `/kzapret autostart <on\|off\|status>` | автозагрузка при входе в Windows |
-| `/kzapret update` | проверить обновления обеих утилит |
-| `/kzapret lang <en\|ru>` | язык интерфейса (по умолчанию en) |
-| `/kzapret status` | общее состояние |
-| `/clear` | очистить логи (или `Ctrl+L`) |
-| `/quit` | остановить всё и выйти (alias `/exit`, или `Ctrl+C`) |
+| `/kzapret autostart <on\|off\|status>` | autostart at Windows logon |
+| `/kzapret update` | check updates for both tools |
+| `/kzapret lang <en\|ru>` | interface language |
+| `/kzapret status` | overall state |
+| `/clear` | clear logs (or `Ctrl+L`) |
+| `/quit` | stop everything and quit (alias `/exit`, or `Ctrl+C`) |
 
-## Как добавить прокси в Telegram
+## Add the proxy to Telegram
 
-Скопируйте ссылку из `/tg-ws-proxy link` (или из мастера первого запуска) и откройте её —
-Telegram сам предложит подключить прокси. Формат:
-`tg://proxy?server=127.0.0.1&port=1443&secret=dd<секрет>`.
+Copy the link from `/tg-ws-proxy link` (or the first-run wizard) and open it —
+Telegram will offer to connect the proxy:
+`tg://proxy?server=127.0.0.1&port=1443&secret=dd<secret>`.
 
-## Где что лежит
-- `kzapret.json` — настройки (авто-конфиг, game filter, ipset, порт и секрет прокси, автозагрузка).
-- `zapret/`, `tg-ws-proxy/` — клонированные репозитории Flowseal.
-- `.venv/` — окружение Python.
+## Notes
 
-## Заметки
-- Секрет прокси генерируется один раз и хранится в `kzapret.json` — ссылка стабильна между перезапусками.
-- zapret запускается как дочерний процесс (а не Windows-служба), поэтому его вывод виден в левой панели.
-- Game filter и ipset переключаются теми же файлами, что использует родной `service.bat`.
+- The proxy secret is generated once and stored in `kzapret.json`, so the link
+  stays stable across restarts. `kzapret.json` is local and not committed.
+- zapret runs as a child process (not a Windows service) so its output shows in
+  the left pane. Game filter and ipset are toggled via the same files that the
+  stock `service.bat` uses.
+- `zapret/` and `tg-ws-proxy/` are cloned on first run and are not part of this repo.
