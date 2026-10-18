@@ -7,6 +7,10 @@ A CLI manager for two [Flowseal](https://github.com/Flowseal) tools:
 One window: zapret logs on the left, tg-ws-proxy logs on the right, a command line
 below. Launch once — both tools come up automatically.
 
+> [!Warning]
+>
+> This project was written entirely by AI.
+
 ## Run
 
 1. Put the `kzapret` folder anywhere (path without non-ASCII characters).
