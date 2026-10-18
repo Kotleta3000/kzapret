@@ -52,6 +52,7 @@ matches); there is also a ghost suggestion (accept with →) and a hint line.
 | `/zapret ipset <on\|off>` | ipset filter |
 | `/zapret test` | run tests, find the best config |
 | `/zapret update` | update (git pull) |
+| `/zapret domainlists` | open domain lists editor |
 
 ### tg-ws-proxy
 | Command | Description |
