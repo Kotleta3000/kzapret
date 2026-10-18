@@ -1,2 +1,5 @@
 textual>=0.60
 cryptography>=42.0
+certifi
+httpx
+h2

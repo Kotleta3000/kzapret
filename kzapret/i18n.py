@@ -38,8 +38,8 @@ _RU = {
         "Конфиг не найден: {name}. /zapret list.",
     "Start zapret: {name}": "Запуск zapret: {name}",
     "zapret stopped (code {rc}).": "zapret остановлен (код {rc}).",
-    "Specify: start|stop|restart|status|list|config|gamefilter|ipset|test|update":
-        "Уточните: start|stop|restart|status|list|config|gamefilter|ipset|test|update",
+    "Specify: start|stop|restart|status|list|config|gamefilter|ipset|domainlists|autotest|test|update":
+        "Уточните: start|stop|restart|status|list|config|gamefilter|ipset|domainlists|autotest|test|update",
     "zapret stopped.": "zapret остановлен.",
     "zapret: {state} | config: {cfg} | gamefilter: {gf} | ipset: {ip} | pid: {pid}":
         "zapret: {state} | конфиг: {cfg} | gamefilter: {gf} | ipset: {ip} | pid: {pid}",
@@ -195,6 +195,65 @@ _RU = {
     "No autostart. Enable later: /kzapret autostart on":
         "Без автозагрузки. Включить позже: /kzapret autostart on",
     "Setup complete.": "Настройка завершена.",
+    # --- списки доменов (/zapret domainlists) ---
+    "edit domain lists (opens a separate window)": "редактор списков доменов (отдельное окно)",
+    "test the config at system start (needs autostart)":
+        "тест конфига при старте системы (нужен автозапуск)",
+    "list number or /command": "номер списка или /команда",
+    "Domain lists - choose a list": "Списки доменов - выберите список",
+    "Enter a list number or name  |  /reset <list>  |  /exit":
+        "Введите номер или имя списка  |  /reset <список>  |  /exit",
+    "No lists found in zapret/lists/. Is zapret installed?":
+        "В zapret/lists/ списков не найдено. zapret установлен?",
+    "{name} - {n} entries": "{name} - записей: {n}",
+    "/add <domain>   /delete <number>   /reset <list>   /back   /exit":
+        "/add <домен>   /delete <номер>   /reset <список>   /back   /exit",
+    "Enter a list number (1-{n}) or name.": "Введите номер списка (1-{n}) или имя.",
+    "Unknown command: {cmd}": "Неизвестная команда: {cmd}",
+    "Select a list first.": "Сначала выберите список.",
+    "Usage: /add <domain>": "Использование: /add <домен>",
+    "Usage: /delete <number>": "Использование: /delete <номер>",
+    "Usage: /reset <list>": "Использование: /reset <список>",
+    "Unknown list: {name}": "Неизвестный список: {name}",
+    "Added: {entry}": "Добавлено: {entry}",
+    "Deleted #{n}: {entry}": "Удалено #{n}: {entry}",
+    "Resetting {name} from Flowseal GitHub...": "Сброс {name} из GitHub Flowseal...",
+    "{name} reset to the original list.": "{name} сброшен до оригинального списка.",
+    "Empty value.": "Пустое значение.",
+    "Value must not contain spaces.": "Значение не должно содержать пробелов.",
+    "Already in the list: {entry}": "Уже есть в списке: {entry}",
+    "Number must be 1..{n}": "Номер должен быть от 1 до {n}",
+    "git is not installed or not in PATH.": "git не установлен или не найден в PATH.",
+    "git clone failed: {err}": "Не удалось клонировать репозиторий (git): {err}",
+    "{name} does not exist in the original repository.":
+        "{name} отсутствует в оригинальном репозитории.",
+    "Domain lists changed.": "Списки доменов изменены.",
+    "Restarting zapret to apply the changes...": "Перезапуск zapret для применения изменений...",
+    "Changes will apply on next zapret start.": "Изменения применятся при следующем запуске zapret.",
+    # --- автотест (/zapret autotest) ---
+    "Autotest requires autostart. Enable it first: /kzapret autostart on":
+        "Автотест работает только с автозагрузкой. Сначала: /kzapret autostart on",
+    "Autotest enabled (runs at system start).": "Автотест включён (запускается при старте системы).",
+    "Autotest disabled.": "Автотест выключен.",
+    "Autotest: {state}": "Автотест: {state}",
+    "Usage: /zapret autotest <on|off>": "Использование: /zapret autotest <on|off>",
+    "Autotest disabled because autostart was turned off.":
+        "Автотест выключен, так как выключена автозагрузка.",
+    "Autotest: waiting for network...": "Автотест: ожидание сети...",
+    "Autotest: no network, starting the current config without testing.":
+        "Автотест: сети нет, запускаю текущий конфиг без теста.",
+    "Autotest: checking {name}...": "Автотест: проверка {name}...",
+    "Autotest: all {n} targets reachable - keeping {name}.":
+        "Автотест: доступны все цели ({n}) - оставляю {name}.",
+    "Autotest: {bad} of {n} targets failed ({names}). Testing all configs...":
+        "Автотест: недоступно целей {bad} из {n} ({names}). Тест всех конфигов...",
+    "Autotest: no auto config yet, testing all configs...":
+        "Автотест: авто-конфиг не задан, тест всех конфигов...",
+    "Autotest: switched to {name}.": "Автотест: переключено на {name}.",
+    "Autotest: no best config found, keeping {name}.":
+        "Автотест: лучший конфиг не найден, оставляю {name}.",
+    "Autotest: no best config found and no auto config set.":
+        "Автотест: лучший конфиг не найден, авто-конфиг не задан.",
     # --- console (__main__) ---
     "[!] Warning: no administrator rights. winws (zapret) requires admin.":
         "[!] Внимание: нет прав администратора. winws (zapret) требует админ-прав.",

@@ -16,6 +16,7 @@ DEFAULTS: Dict[str, Any] = {
         "gamefilter": "off",        # off | tcp | udp | all
         "ipset": "off",             # on | off
         "autostart": True,          # поднимать zapret при старте kzapret
+        "autotest": False,          # при старте системы (--auto) проверить конфиг, при провале - найти лучший
     },
     "proxy": {
         "port": 1443,

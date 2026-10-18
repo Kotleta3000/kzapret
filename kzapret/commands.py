@@ -17,6 +17,8 @@ COMMANDS: List[Tuple[str, str, str]] = [
     ("/zapret config", "<config>", "set auto config (and restart)"),
     ("/zapret gamefilter", "<off|tcp|udp|all>", "game filter for games (ports >1023)"),
     ("/zapret ipset", "<on|off>", "ipset filter (full list / off)"),
+    ("/zapret domainlists", "", "edit domain lists (opens a separate window)"),
+    ("/zapret autotest", "<on|off>", "test the config at system start (needs autostart)"),
     ("/zapret test", "", "run tests, find the best config"),
     ("/zapret update", "", "update zapret (git pull)"),
     ("/tg-ws-proxy start", "", "start the Telegram proxy (headless)"),
@@ -49,6 +51,7 @@ ALIASES = {
 ENUM_ARGS = {
     "/zapret gamefilter": ["off", "tcp", "udp", "all"],
     "/zapret ipset": ["on", "off"],
+    "/zapret autotest": ["on", "off"],
     "/kzapret autostart": ["on", "off", "status"],
     "/kzapret lang": ["en", "ru"],
     "/tg-ws-proxy secret": ["new"],

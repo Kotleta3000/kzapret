@@ -93,7 +93,7 @@ def _run() -> None:
     elif not args.auto:
         _check_updates_console(cfg)
 
-    KzapretApp(cfg, autostart_on_mount=True).run()
+    KzapretApp(cfg, autostart_on_mount=True, boot_mode=args.auto).run()
 
 
 def main() -> None:

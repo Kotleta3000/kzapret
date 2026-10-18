@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import shlex
 import subprocess
+import time
 import webbrowser
 from typing import List, Optional
 
@@ -14,7 +15,8 @@ from textual.containers import Horizontal, Vertical
 from textual.suggester import Suggester
 from textual.widgets import Input, RichLog, Static
 
-from . import autostart, commands, config, proxy_manager, updates, zapret_manager
+from . import autostart, autotest, commands, config, proxy_manager, updates, zapret_manager
+from .domainlists_screen import DomainListsScreen
 from .i18n import set_lang, t
 
 _NO_WINDOW = 0x08000000
@@ -101,9 +103,11 @@ class KzapretApp(App):
         ("ctrl+l", "clear_logs", "Clear"),
     ]
 
-    def __init__(self, cfg: config.Config, autostart_on_mount: bool = True):
+    def __init__(self, cfg: config.Config, autostart_on_mount: bool = True,
+                 boot_mode: bool = False):
         super().__init__()
         self.cfg = cfg
+        self._boot_mode = boot_mode  # запущены задачей автозагрузки (--auto)
         set_lang(cfg.lang)
         self._autostart = autostart_on_mount
         self.zapret = zapret_manager.ZapretRuntime()
@@ -132,7 +136,7 @@ class KzapretApp(App):
 
     # ---------- output ----------
     def _log(self, widget_id: str, text: str, style: Optional[str] = None) -> None:
-        rl = self.query_one(f"#{widget_id}", RichLog)
+        rl = self.screen_stack[0].query_one(f"#{widget_id}", RichLog)
         rl.write(Text(text, style=style) if style else text)
 
     def zlog(self, line: str) -> None:
@@ -168,10 +172,65 @@ class KzapretApp(App):
 
     async def _autostart_both(self) -> None:
         await self._cleanup_leftovers()
+        autotest_on = (self._boot_mode and self.cfg.autostart
+                       and bool(self.cfg.zapret.get("autotest", False)))
         if self.cfg.zapret.get("autostart", True):
-            await self._zapret_start(None)
+            if autotest_on:
+                # тест может идти минуты - не задерживаем запуск прокси
+                self._spawn(self._autotest_boot())
+            else:
+                await self._zapret_start(None)
         if self.cfg.proxy.get("autostart", True):
             await self._proxy_start()
+
+    # ---------- автотест при старте системы ----------
+    async def _wait_winws(self, timeout: float = 15.0) -> None:
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + timeout
+        while loop.time() < deadline:
+            if await asyncio.to_thread(zapret_manager.winws_running):
+                break
+            await asyncio.sleep(0.5)
+        await asyncio.sleep(3.0)  # дать winws начать перехват трафика
+
+    async def _autotest_boot(self) -> None:
+        name = self.cfg.zapret.get("auto_config")
+        self.sys(t("Autotest: waiting for network..."), style=ST_WARN)
+        if not await asyncio.to_thread(autotest.wait_for_network, 90.0):
+            self.sys_err(t("Autotest: no network, starting the current config without testing."))
+            await self._zapret_start(None)
+            return
+
+        if name and name in self.configs:
+            self.sys(t("Autotest: checking {name}...", name=name))
+            await self._zapret_start(name)
+            await self._wait_winws()
+            ok, results = await asyncio.to_thread(autotest.check_targets)
+            if ok:
+                self.sys_ok(t("Autotest: all {n} targets reachable - keeping {name}.",
+                              n=len(results), name=name))
+                return
+            bad = [n for n, good in results if not good]
+            self.sys(t("Autotest: {bad} of {n} targets failed ({names}). Testing all configs...",
+                       bad=len(bad), n=len(results), names=", ".join(bad)), style=ST_WARN)
+            await self.zapret.stop()
+        else:
+            self.sys(t("Autotest: no auto config yet, testing all configs..."), style=ST_WARN)
+
+        started = time.time()
+        best = await zapret_manager.run_tests(self.zlog, since=started)
+        if best and best not in self.configs and best + ".bat" in self.configs:
+            best += ".bat"
+        if best and best in self.configs:
+            self.cfg.zapret["auto_config"] = best
+            self.cfg.save()
+            self.sys_ok(t("Autotest: switched to {name}.", name=best))
+            await self._zapret_start(best)
+        elif name and name in self.configs:
+            self.sys_err(t("Autotest: no best config found, keeping {name}.", name=name))
+            await self._zapret_start(name)
+        else:
+            self.sys_err(t("Autotest: no best config found and no auto config set."))
 
     # ---------- input events ----------
     def on_input_changed(self, event: Input.Changed) -> None:
@@ -250,7 +309,7 @@ class KzapretApp(App):
 
     async def _cmd_zapret(self, args: List[str]) -> None:
         if not args:
-            self.sys_err(t("Specify: start|stop|restart|status|list|config|gamefilter|ipset|test|update"))
+            self.sys_err(t("Specify: start|stop|restart|status|list|config|gamefilter|ipset|domainlists|autotest|test|update"))
             return
         sub = args[0].lower()
         rest = args[1:]
@@ -307,6 +366,10 @@ class KzapretApp(App):
                 self.sys_err(t("Usage: /zapret ipset <on|off>"))
                 return
             self._spawn(self._apply_ipset(rest[0].lower() == "on"))
+        elif sub == "domainlists":
+            self.push_screen(DomainListsScreen(), self._domainlists_closed)
+        elif sub == "autotest":
+            self._cmd_autotest(rest)
         elif sub == "test":
             self.sys(t("Running zapret tests (a few minutes)..."))
             self._spawn(self._run_tests())
@@ -315,6 +378,41 @@ class KzapretApp(App):
             self._spawn(self._update_zapret())
         else:
             self.sys_err(t("Unknown zapret subcommand: {sub}", sub=sub))
+
+    def _domainlists_closed(self, changed: Optional[bool]) -> None:
+        self.query_one("#cmd", Input).focus()
+        if not changed:
+            return
+        self.sys(t("Domain lists changed."))
+        if self.zapret.running:
+            self.sys(t("Restarting zapret to apply the changes..."))
+            self._spawn(self._restart_current())
+        else:
+            self.sys(t("Changes will apply on next zapret start."))
+
+    async def _restart_current(self) -> None:
+        name = self.zapret.current_config
+        await self.zapret.stop()
+        await self._zapret_start(name)
+
+    def _cmd_autotest(self, rest: List[str]) -> None:
+        mode = rest[0].lower() if rest else "status"
+        if mode == "on":
+            if not self.cfg.autostart:
+                self.sys_err(t("Autotest requires autostart. Enable it first: /kzapret autostart on"))
+                return
+            self.cfg.zapret["autotest"] = True
+            self.cfg.save()
+            self.sys_ok(t("Autotest enabled (runs at system start)."))
+        elif mode == "off":
+            self.cfg.zapret["autotest"] = False
+            self.cfg.save()
+            self.sys_ok(t("Autotest disabled."))
+        elif mode == "status":
+            on = bool(self.cfg.zapret.get("autotest", False))
+            self.sys(t("Autotest: {state}", state=t("enabled") if on else t("disabled")))
+        else:
+            self.sys_err(t("Usage: /zapret autotest <on|off>"))
 
     async def _apply_ipset(self, on: bool) -> None:
         self.sys(t("Changing ipset..."))
@@ -472,6 +570,9 @@ class KzapretApp(App):
             elif mode == "off":
                 ok, out = await asyncio.to_thread(autostart.disable)
                 self.cfg.data["autostart"] = False
+                if self.cfg.zapret.get("autotest"):
+                    self.cfg.zapret["autotest"] = False
+                    self.sys(t("Autotest disabled because autostart was turned off."))
                 self.cfg.save()
                 self.sys_ok(t("Autostart disabled.")) if ok else self.sys_err(t("Failed: {out}", out=out))
             else:
@@ -518,7 +619,7 @@ class KzapretApp(App):
     # ---------- misc ----------
     def action_clear_logs(self) -> None:
         for wid in ("zapret", "proxy", "system"):
-            self.query_one(f"#{wid}", RichLog).clear()
+            self.screen_stack[0].query_one(f"#{wid}", RichLog).clear()
         self.sys(t("Logs cleared."))
 
     async def _cmd_quit(self) -> None:

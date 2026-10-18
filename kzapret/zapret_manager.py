@@ -148,7 +148,6 @@ def set_ipset(enabled: bool, log: Optional[Callable[[str], None]] = None) -> str
         paths.IPSET_FILE.write_text(_DUMMY_IP + "\n", encoding="ascii")
         return "none"
 
-
 # ---------- запуск winws с захватом логов ----------
 
 def _build_run_bat(config_name: str) -> None:
@@ -215,7 +214,8 @@ def _prepare_test_script() -> Path:
 
 
 async def run_tests(on_line: Callable[[str], None],
-                    test_type: str = "1", mode: str = "1") -> Optional[str]:
+                    test_type: str = "1", mode: str = "1",
+                    since: float = 0.0) -> Optional[str]:
     """Гоняет utils/test zapret.ps1 (standard/all по умолчанию). Возвращает лучший конфиг.
 
     test_type: 1=standard, 2=dpi; mode: 1=all, 2=selected (в авто не используем).
@@ -237,11 +237,13 @@ async def run_tests(on_line: Callable[[str], None],
         on_line=on_line,
         env=env,
     )
-    return latest_best_config()
+    return latest_best_config(since)
 
 
-def latest_best_config() -> Optional[str]:
-    """Читает 'Best strategy:' из самого свежего файла результатов."""
+def latest_best_config(since: float = 0.0) -> Optional[str]:
+    """Читает 'Best strategy:' из самого свежего файла результатов.
+
+    since: игнорировать файлы старше этого времени (чтобы не взять результат прошлого теста)."""
     if not paths.TEST_RESULTS_DIR.exists():
         return None
     files = sorted(
@@ -251,6 +253,8 @@ def latest_best_config() -> Optional[str]:
     )
     for f in files:
         try:
+            if since and f.stat().st_mtime < since - 2:
+                continue
             text = f.read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
